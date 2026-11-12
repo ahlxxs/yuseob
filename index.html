@@ -222,8 +222,9 @@ body[data-genre="isekai"] .adv .moon::after{content:"";position:absolute;width:3
 /* ───────── 기본 데이터 (관리자 페이지에서 수정 가능) ───────── */
 const DEFAULT_DATA = {
   subjects:[
-    {id:'kor',name:'국어',icon:'國'},{id:'eng',name:'영어',icon:'英'},{id:'math',name:'수학',icon:'數'},
-    {id:'sci',name:'과학',icon:'科'},{id:'soc',name:'사회',icon:'社'},{id:'etc',name:'기타',icon:'雜'}],
+    {id:'phy',name:'물리',icon:'物'},{id:'chem',name:'화학',icon:'化'},{id:'bio',name:'생명',icon:'生'},
+    {id:'earth',name:'지구',icon:'地'},{id:'calc',name:'미적분',icon:'微'},{id:'stat',name:'확통',icon:'確'},
+    {id:'khist',name:'한국사',icon:'韓'},{id:'eng',name:'영어',icon:'英'},{id:'ai',name:'인공지능',icon:'智'}],
   genres:[
     {id:'isekai',name:'이세계',sym:'☽',color:'#9b7fe0',desc:'트럭에 치인 뒤 눈을 떠보니 마법과 스킬창이 있는 세계. 레벨업이 곧 생존이다.'},
     {id:'medieval',name:'중세 판타지',sym:'♜',color:'#c0563f',desc:'왕국과 기사단, 용과 성배. 검과 신앙으로 이름을 남겨라.'},
@@ -239,26 +240,26 @@ const DEFAULT_DATA = {
     {id:'jade',name:'검선의 옥패',icon:'🟢',rarity:'희귀',drop:4,genre:'murim'}],
   classes:[
     {id:'is0',genre:'isekai',name:'견습 전생자',icon:'✦',tier:0,desc:'아직 스킬창 보는 법도 모르는 신입 전생자.',req:{},items:[],hidden:false},
-    {id:'is1',genre:'isekai',name:'용사',icon:'⚔',tier:1,desc:'여신에게 선택받은 자. 균형 잡힌 실력이 필요하다.',req:{math:5,kor:5},items:[],hidden:false},
-    {id:'is2',genre:'isekai',name:'대마법사',icon:'✺',tier:1,desc:'수식으로 마법진을 그리는 학자형 마법사.',req:{sci:8,math:5},items:[],hidden:false},
-    {id:'is3',genre:'isekai',name:'성녀',icon:'✚',tier:1,desc:'말과 기도로 사람을 치유한다.',req:{kor:6,soc:6},items:[],hidden:false},
-    {id:'is4',genre:'isekai',name:'테이머',icon:'❦',tier:1,desc:'이계의 생물과 말을 나누는 자.',req:{sci:5,eng:5},items:[],hidden:false},
-    {id:'is9',genre:'isekai',name:'마왕',icon:'♛',tier:2,desc:'용사를 기다리던 왕좌의 주인. 마왕의 뿔이 열쇠다.',req:{math:20},items:['horn'],hidden:true},
-    {id:'is8',genre:'isekai',name:'현자',icon:'☯',tier:2,desc:'모든 학문을 꿰뚫은 자만이 현자의 돌을 다룬다.',req:{kor:10,eng:10,math:10,sci:10,soc:10},items:['stone'],hidden:true},
+    {id:'is1',genre:'isekai',name:'용사',icon:'⚔',tier:1,desc:'여신에게 선택받은 자. 균형 잡힌 실력이 필요하다.',req:{calc:5,phy:5},items:[],hidden:false},
+    {id:'is2',genre:'isekai',name:'대마법사',icon:'✺',tier:1,desc:'수식으로 마법진을 그리는 학자형 마법사.',req:{chem:8,calc:5},items:[],hidden:false},
+    {id:'is3',genre:'isekai',name:'성녀',icon:'✚',tier:1,desc:'말과 기도로 사람을 치유한다.',req:{bio:6,khist:6},items:[],hidden:false},
+    {id:'is4',genre:'isekai',name:'테이머',icon:'❦',tier:1,desc:'이계의 생물과 말을 나누는 자.',req:{bio:5,eng:5},items:[],hidden:false},
+    {id:'is9',genre:'isekai',name:'마왕',icon:'♛',tier:2,desc:'용사를 기다리던 왕좌의 주인. 마왕의 뿔이 열쇠다.',req:{calc:20},items:['horn'],hidden:true},
+    {id:'is8',genre:'isekai',name:'현자',icon:'☯',tier:2,desc:'모든 학문을 꿰뚫은 자만이 현자의 돌을 다룬다.',req:{phy:5,chem:5,bio:5,earth:5,calc:5,stat:5,khist:5,eng:5,ai:5},items:['stone'],hidden:true},
     {id:'md0',genre:'medieval',name:'견습 종자',icon:'✦',tier:0,desc:'기사의 갑옷을 닦으며 꿈을 키우는 소년소녀.',req:{},items:[],hidden:false},
-    {id:'md1',genre:'medieval',name:'기사',icon:'⛨',tier:1,desc:'왕국의 법과 역사를 지키는 방패.',req:{soc:6,kor:4},items:[],hidden:false},
-    {id:'md2',genre:'medieval',name:'궁수',icon:'➶',tier:1,desc:'바람과 거리를 계산해 화살을 쏜다.',req:{math:6,sci:4},items:[],hidden:false},
-    {id:'md3',genre:'medieval',name:'사제',icon:'✝',tier:1,desc:'고대어 경전을 읽는 신의 대리인.',req:{kor:6,eng:4},items:[],hidden:false},
-    {id:'md4',genre:'medieval',name:'연금술사',icon:'⚗',tier:1,desc:'납을 금으로 바꾸려는 집념의 실험가.',req:{sci:8,math:4},items:[],hidden:false},
-    {id:'md9',genre:'medieval',name:'드래곤 슬레이어',icon:'♞',tier:2,desc:'용의 비늘을 증표로 지닌 전설의 사냥꾼.',req:{soc:12,sci:12},items:['scale'],hidden:true},
-    {id:'md8',genre:'medieval',name:'성배의 기사',icon:'♔',tier:2,desc:'성배를 찾아낸 단 한 명의 기사.',req:{kor:15,soc:15},items:['grail'],hidden:true},
+    {id:'md1',genre:'medieval',name:'기사',icon:'⛨',tier:1,desc:'왕국의 법과 역사를 지키는 방패.',req:{khist:6,phy:4},items:[],hidden:false},
+    {id:'md2',genre:'medieval',name:'궁수',icon:'➶',tier:1,desc:'바람과 거리를 계산해 화살을 쏜다.',req:{phy:6,calc:4},items:[],hidden:false},
+    {id:'md3',genre:'medieval',name:'사제',icon:'✝',tier:1,desc:'고대어 경전을 읽는 신의 대리인.',req:{khist:6,eng:4},items:[],hidden:false},
+    {id:'md4',genre:'medieval',name:'연금술사',icon:'⚗',tier:1,desc:'납을 금으로 바꾸려는 집념의 실험가.',req:{chem:8,stat:4},items:[],hidden:false},
+    {id:'md9',genre:'medieval',name:'드래곤 슬레이어',icon:'♞',tier:2,desc:'용의 비늘을 증표로 지닌 전설의 사냥꾼.',req:{earth:12,bio:12},items:['scale'],hidden:true},
+    {id:'md8',genre:'medieval',name:'성배의 기사',icon:'♔',tier:2,desc:'성배를 찾아낸 단 한 명의 기사.',req:{khist:15,eng:15},items:['grail'],hidden:true},
     {id:'mr0',genre:'murim',name:'강호초출',icon:'✦',tier:0,desc:'봇짐 하나 메고 강호에 나선 풋내기.',req:{},items:[],hidden:false},
-    {id:'mr1',genre:'murim',name:'검객',icon:'劍',tier:1,desc:'일검에 모든 것을 담는다.',req:{math:6,kor:4},items:[],hidden:false},
-    {id:'mr2',genre:'murim',name:'권사',icon:'拳',tier:1,desc:'맨주먹으로 세상을 논한다.',req:{soc:6,sci:4},items:[],hidden:false},
-    {id:'mr3',genre:'murim',name:'의원',icon:'醫',tier:1,desc:'침 한 대로 생사를 가른다.',req:{sci:6,kor:4},items:[],hidden:false},
-    {id:'mr4',genre:'murim',name:'책사',icon:'策',tier:1,desc:'붓 한 자루로 천군만마를 움직인다.',req:{kor:6,soc:6},items:[],hidden:false},
-    {id:'mr9',genre:'murim',name:'천마',icon:'魔',tier:2,desc:'천마신공을 대성한 마교의 주인.',req:{math:15,sci:15},items:['manual'],hidden:true},
-    {id:'mr8',genre:'murim',name:'검선',icon:'仙',tier:2,desc:'검으로 신선의 경지에 오른 자.',req:{kor:15,math:15},items:['jade'],hidden:true}],
+    {id:'mr1',genre:'murim',name:'검객',icon:'劍',tier:1,desc:'일검에 모든 것을 담는다.',req:{phy:6,calc:4},items:[],hidden:false},
+    {id:'mr2',genre:'murim',name:'권사',icon:'拳',tier:1,desc:'맨주먹으로 세상을 논한다.',req:{bio:6,earth:4},items:[],hidden:false},
+    {id:'mr3',genre:'murim',name:'의원',icon:'醫',tier:1,desc:'침 한 대로 생사를 가른다.',req:{bio:6,chem:4},items:[],hidden:false},
+    {id:'mr4',genre:'murim',name:'책사',icon:'策',tier:1,desc:'붓 한 자루로 천군만마를 움직인다.',req:{stat:6,ai:6},items:[],hidden:false},
+    {id:'mr9',genre:'murim',name:'천마',icon:'魔',tier:2,desc:'천마신공을 대성한 마교의 주인.',req:{phy:15,chem:15},items:['manual'],hidden:true},
+    {id:'mr8',genre:'murim',name:'검선',icon:'仙',tier:2,desc:'검으로 신선의 경지에 오른 자.',req:{earth:15,calc:15},items:['jade'],hidden:true}],
   events:{
     isekai:['슬라임 무리를 조용히 지나쳤다.','길드 게시판에서 새 의뢰를 발견했다.','스킬창에 낯선 알림이 떴다.','엘프 상인이 길을 알려주었다.','하늘에 달이 두 개 떠 있다.'],
     medieval:['성문 앞에서 통행증을 보였다.','여관 난롯가에서 잠시 숨을 골랐다.','멀리서 용의 포효가 들린다.','순례자와 길을 함께했다.','오래된 성채의 문장을 발견했다.'],
@@ -270,10 +271,10 @@ const store = {
   get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch{return d}},
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 };
-let D = store.get('ft_data', structuredClone(DEFAULT_DATA));
+let D = store.get('ft_data_v2', structuredClone(DEFAULT_DATA));
 let U = store.get('ft_user', null);
 const saveU = () => store.set('ft_user', U);
-const saveD = () => store.set('ft_data', D);
+const saveD = () => store.set('ft_data_v2', D);
 
 /* ───────── 도우미 ───────── */
 const $ = s => document.querySelector(s);
@@ -282,9 +283,9 @@ const find = (list,id) => D[list].find(x=>x.id===id);
 const hm = min => { min=Math.floor(min); const h=Math.floor(min/60), m=min%60; return h ? `${h}시간 ${m}분` : `${m}분`; };
 const lv = min => Math.floor(Math.sqrt(min/15))+1;              // 15분→Lv2, 1h→Lv3, 10h→Lv7, 100h→Lv26
 const lvMin = l => 15*(l-1)**2;
-const totalMin = () => Object.values(U.study).reduce((a,b)=>a+b,0);
+const totalMin = () => D.subjects.reduce((a,s)=>a+(U.study[s.id]||0),0); // 삭제된 과목 시간은 제외
 const myClass = () => find('classes',U.classId);
-const power = () => Math.round(totalMin()*10 + (myClass()?.tier||0)*500 + Object.values(U.study).reduce((a,m)=>a+lv(m)*50,0));
+const power = () => Math.round(totalMin()*10 + (myClass()?.tier||0)*500 + D.subjects.reduce((a,s)=>a+lv(U.study[s.id]||0)*50,0));
 const meetsReq = c => Object.entries(c.req||{}).every(([s,h])=>!find('subjects',s) || (U.study[s]||0)/60 >= h) && (c.items||[]).every(i=>U.items[i]>0);
 const revealed = c => !c.hidden || U.classId===c.id || (c.items||[]).some(i=>U.items[i]>0);
 function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.append(t);setTimeout(()=>t.remove(),2400)}
