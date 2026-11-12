@@ -405,7 +405,7 @@ function draw(c,B,t,alpha=1){
 
 function start(cv,getStory,isPaused,onArrive,from='tavern'){
   const i0=Math.max(0,ORDER.indexOf(from));
-  for(const S of Object.values(PHOTO))if(!IMG[S.img]){const im=new Image();im.src='img/isekai/'+S.img+'.jpg?v=5';IMG[S.img]=im}
+  for(const S of Object.values(PHOTO))if(!IMG[S.img]){const im=new Image();im.src='img/isekai/'+S.img+'.jpg?v=6';IMG[S.img]=im}
   const ctx=cv.getContext('2d'),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let W0=0,H0=0,cache={},cur=null,prev=null,fadeAt=0,t=0,last=performance.now(),raf;
   const size=()=>{const r=cv.getBoundingClientRect();W0=r.width;H0=r.height;cv.width=W0*DPR;cv.height=H0*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);Object.values(cache).forEach(free);cache={}};
