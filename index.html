@@ -273,6 +273,9 @@ body[data-genre="isekai"] .ground::after{background:repeating-linear-gradient(90
 body[data-genre="isekai"] .adv .hud{color:#fff;text-shadow:0 2px 10px rgba(30,70,110,.55)}
 body[data-genre="isekai"] .adv .event{color:#fff}
 .clouds{display:none}
+.adv.photo{background:#000}
+.adv .scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.adv .place{position:absolute;z-index:2;left:max(14px,env(safe-area-inset-left,0px));top:max(14px,env(safe-area-inset-top,0px));padding:4px 14px;border-radius:999px;background:rgba(10,20,25,.45);border:1px solid rgba(216,182,101,.6);color:#fff;font-size:.9rem;backdrop-filter:blur(4px)}
 body[data-genre="isekai"] .clouds{display:block;position:absolute;left:0;right:0;height:120px;opacity:.9;background:linear-gradient(#fff6dc,#e6c278);
   -webkit-mask:var(--cl) repeat-x 0 0/520px 100%;mask:var(--cl) repeat-x 0 0/520px 100%;animation:scroll 70s linear infinite;--w:520px;
   --cl:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 120'%3E%3Cg fill='%23000'%3E%3Ccircle cx='60' cy='70' r='34'/%3E%3Ccircle cx='110' cy='55' r='42'/%3E%3Ccircle cx='165' cy='72' r='30'/%3E%3Crect x='40' y='70' width='150' height='30' rx='15'/%3E%3Ccircle cx='330' cy='60' r='26'/%3E%3Ccircle cx='370' cy='48' r='34'/%3E%3Ccircle cx='412' cy='64' r='24'/%3E%3Crect x='310' y='62' width='120' height='24' rx='12'/%3E%3C/g%3E%3C/svg%3E")}
@@ -292,6 +295,7 @@ body[data-genre="isekai"] .clouds.c2{top:42%;height:80px;opacity:.6;animation-du
 </div></nav>
 <div id="layer"></div>
 
+<script src="isekai-scenes.js"></script>
 <script>
 /* ───────── 기본 데이터 (관리자 페이지에서 수정 가능) ───────── */
 const DEFAULT_DATA = {
@@ -512,17 +516,18 @@ function logList(n){
 }
 
 /* ───────── 모험중… 화면 ───────── */
-let tick=null, wake=null;
+let tick=null, wake=null, sceneStop=null;
 const elapsed = () => U.run.acc + (U.run.at ? Date.now()-U.run.at : 0);
 function openAdventure(){
   if($('.adv')) return;
   const c=myClass(), s=find('subjects',U.run.s);
   const ev=D.events?.[U.genre]||['길을 따라 걸었다.'];
-  $('#layer').innerHTML=`<div class="adv" role="dialog" aria-label="모험중">
-    <div class="stars"></div><div class="moon"></div><div class="clouds c1"></div><div class="clouds c2"></div>
+  const isk=U.genre==='isekai'&&window.IsekaiJourney;
+  $('#layer').innerHTML=`<div class="adv${isk?' photo':''}" role="dialog" aria-label="모험중">
+    ${isk?'<canvas class="scene" aria-hidden="true"></canvas><div class="place" id="place"></div>':`<div class="stars"></div><div class="moon"></div><div class="clouds c1"></div><div class="clouds c2"></div>
     ${[...Array(6)].map((_,i)=>`<i class="fly" style="left:${10+i*15}%;top:${45+(i%3)*10}%;animation-delay:${i*.9}s"></i>`).join('')}
     <div class="layer l1"></div><div class="layer l2"></div><div class="layer l3"></div><div class="ground"></div>
-    <div class="hero-walk"><div class="body">${esc(c?.icon||'✦')}</div><div class="shadow"></div></div>
+    <div class="hero-walk"><div class="body">${esc(c?.icon||'✦')}</div><div class="shadow"></div></div>`}
     <div class="hud"><div class="latin" style="color:#f3e7c4">${esc(s?.name||'')} · ${esc(c?.name||'')}</div>
       <div class="going">모험중<i>.</i><i>.</i><i>.</i></div>
       <div class="clock num" id="clk">00:00:00</div>
@@ -534,16 +539,18 @@ function openAdventure(){
   tick=setInterval(()=>{
     const t=Math.floor(elapsed()/1000);
     $('#clk').textContent=[t/3600,t/60%60,t%60].map(x=>String(Math.floor(x)).padStart(2,'0')).join(':');
-    if(U.run.at && t>0 && t%45===0) $('#evt').textContent=ev[++n%ev.length];
+    if(!isk && U.run.at && t>0 && t%45===0) $('#evt').textContent=ev[++n%ev.length];
   },250);
   pz.onclick=()=>{ if(U.run.at){U.run.acc+=Date.now()-U.run.at;U.run.at=null}else U.run.at=Date.now(); saveU(); sync(); };
   $('#end').onclick=finishAdventure;
   sync();
+  if(isk) sceneStop=IsekaiJourney.start($('.adv .scene'),()=>elapsed()/1000,()=>!U.run?.at,(name,first)=>{
+    $('#place').textContent='◆ '+name; $('#evt').textContent=first?`${name}에서 모험을 시작했다.`:`${name}에 도착했다.`});
   navigator.wakeLock?.request('screen').then(w=>wake=w).catch(()=>{}); // 패드 화면 꺼짐 방지
 }
 function finishAdventure(){
   const min=Math.floor(elapsed()/60000), s=U.run.s;
-  clearInterval(tick); wake?.release().catch(()=>{}); wake=null;
+  clearInterval(tick); sceneStop?.(); sceneStop=null; wake?.release().catch(()=>{}); wake=null;
   U.run=null; $('#layer').innerHTML='';
   if(min<1){ saveU(); render(); return toast('1분 이상 모험해야 기록됩니다.'); }
   const before=lv(U.study[s]||0);
