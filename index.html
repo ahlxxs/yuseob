@@ -273,6 +273,20 @@ body[data-genre="isekai"] .ground::after{background:repeating-linear-gradient(90
 body[data-genre="isekai"] .adv .hud{color:#fff;text-shadow:0 2px 10px rgba(30,70,110,.55)}
 body[data-genre="isekai"] .adv .event{color:#fff}
 .clouds{display:none}
+.from{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:center}
+.mapview{position:fixed;inset:0;z-index:25;background:#1a1712;display:grid;grid-template-rows:auto 1fr auto;color:#f3ead6}
+.maphead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid #6f5a2c}
+.maphead .note{color:#c8b890}
+.mapscroll{overflow:auto;-webkit-overflow-scrolling:touch}
+.mapbox{position:relative;width:min(100%,560px);margin:0 auto}
+.mapbox img{display:block;width:100%;max-width:100%}
+.pin{position:absolute;transform:translate(-50%,-50%);border:0;background:none;padding:6px;display:grid;justify-items:center;gap:2px;color:#fff;font:inherit;min-width:44px;min-height:44px;touch-action:manipulation}
+.pin i{font-style:normal;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:rgba(30,25,20,.75);border:1.5px solid #8a7a5a;font-size:.8rem;color:#c8b890}
+.pin.on i{background:#2d8590;border-color:#f0d998;color:#fff;box-shadow:0 0 12px rgba(92,192,194,.8)}
+.pin.cur i{background:#e8c66a;color:#2a2010;box-shadow:0 0 0 4px rgba(232,198,106,.35),0 0 18px #e8c66a}
+.pin span{font-size:.72rem;white-space:nowrap;padding:1px 8px;border-radius:999px;background:rgba(20,16,12,.75);text-shadow:none}
+.pin:disabled{cursor:default}
+.mapinfo{margin:0;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));border-top:1px solid #6f5a2c;font-size:.92rem}
 .adv.photo{background:#000}
 .adv .scene{position:absolute;inset:0;width:100%;height:100%;display:block}
 .adv .place{position:absolute;z-index:2;left:max(14px,env(safe-area-inset-left,0px));top:max(14px,env(safe-area-inset-top,0px));padding:4px 14px;border-radius:999px;background:rgba(10,20,25,.45);border:1px solid rgba(216,182,101,.6);color:#fff;font-size:.9rem;backdrop-filter:blur(4px)}
@@ -295,7 +309,7 @@ body[data-genre="isekai"] .clouds.c2{top:42%;height:80px;opacity:.6;animation-du
 </div></nav>
 <div id="layer"></div>
 
-<script src="isekai-scenes.js?v=3"></script><!-- 장면 코드를 고치면 v 숫자를 올려야 패드·폰 브라우저가 예전 파일을 버림 -->
+<script src="isekai-scenes.js?v=4"></script><!-- 장면 코드를 고치면 v 숫자를 올려야 패드·폰 브라우저가 예전 파일을 버림 -->
 <script>
 /* ───────── 기본 데이터 (관리자 페이지에서 수정 가능) ───────── */
 const DEFAULT_DATA = {
@@ -503,12 +517,34 @@ function renderHome(){
     <div class="orn">✦</div>
     <p style="margin:0">어떤 과목으로 모험을 떠날까요?</p>
     <div class="row" style="justify-content:center" id="subs">${D.subjects.map(s=>`<button class="chip" data-s="${s.id}" aria-pressed="${s.id===pickedSubj}"><span class="seal" style="width:26px;height:26px;font-size:.8rem">${esc(s.icon)}</span>${esc(s.name)}</button>`).join('')}</div>
+    ${isekaiMap()?`<div class="from"><span class="note">출발지</span><b>◆ ${esc(placeName(startPlace()))}</b><button class="chip" id="map">지도 열기 · 탐험 ${visited().length}/${isekaiMap().length}</button></div>`:''}
     <div><button class="btn accent" id="go" style="min-width:220px;min-height:56px;font-size:1.1rem">⚔ 모험 떠나기</button></div>
     <p class="note" style="color:var(--muted)">10분 모험할 때마다 유물을 발견할 기회가 있습니다.</p>
   </section>
   <section class="sheet"><div class="sheet-title"><h2>최근 모험 일지</h2></div>${logList(8)}</section>`;
   document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{pickedSubj=b.dataset.s;document.querySelectorAll('[data-s]').forEach(x=>x.setAttribute('aria-pressed',x===b))});
-  $('#go').onclick=()=>{ if(!pickedSubj) return; U.run={s:pickedSubj,acc:0,at:Date.now()}; saveU(); openAdventure(); };
+  $('#go').onclick=()=>{ if(!pickedSubj) return; U.run={s:pickedSubj,acc:0,at:Date.now(),from:startPlace()}; saveU(); openAdventure(); };
+  $('#map')&&($('#map').onclick=openMap);
+}
+
+/* ───────── 이세계 지도: 가본 곳에서만 출발할 수 있음 ───────── */
+const isekaiMap=()=>U.genre==='isekai'&&window.IsekaiJourney?IsekaiJourney.places:null;
+const visited=()=>U.visited?.length?U.visited:['tavern'];
+const startPlace=()=>visited().includes(U.startPlace)?U.startPlace:'tavern';
+const placeName=id=>isekaiMap()?.find(p=>p.id===id)?.name||'모험가의 쉼터';
+function openMap(){
+  const ps=isekaiMap(), vis=visited(), cur=startPlace();
+  $('#layer').innerHTML=`<div class="mapview" role="dialog" aria-label="세계 지도">
+    <div class="maphead"><div><div class="latin">World map</div><b>출발지를 고르세요</b> <span class="note">가본 곳 ${vis.length}/${ps.length}</span></div><button class="btn" id="mclose">닫기</button></div>
+    <div class="mapscroll"><div class="mapbox"><img src="img/isekai/map.jpg" alt="이세계 지도">
+      ${ps.map(p=>{const v=vis.includes(p.id);return `<button class="pin${v?' on':''}${p.id===cur?' cur':''}" style="left:${p.pos[0]*100}%;top:${p.pos[1]*100}%" data-p="${p.id}" ${v?'':'disabled'} aria-label="${v?esc(p.name):'아직 가보지 않은 곳'}"><i>${v?'◆':'?'}</i>${v?`<span>${esc(p.name)}</span>`:''}</button>`}).join('')}
+    </div></div>
+    <p class="mapinfo" id="minfo">${esc(placeName(cur))}: ${esc(ps.find(p=>p.id===cur)?.desc||'')}</p></div>`;
+  $('#mclose').onclick=()=>{$('#layer').innerHTML='';renderHome()};
+  document.querySelectorAll('.pin.on').forEach(b=>b.onclick=()=>{U.startPlace=b.dataset.p;saveU();
+    document.querySelectorAll('.pin').forEach(x=>x.classList.toggle('cur',x===b));
+    const p=ps.find(x=>x.id===b.dataset.p);$('#minfo').textContent=`${p.name}: ${p.desc}`;toast(`${p.name}에서 출발합니다.`)});
+  $('.pin.cur')?.scrollIntoView({block:'center'});
 }
 function logList(n){
   if(!U.log.length) return `<p class="note">아직 기록이 없습니다. 첫 모험을 떠나 보세요.</p>`;
@@ -544,8 +580,12 @@ function openAdventure(){
   pz.onclick=()=>{ if(U.run.at){U.run.acc+=Date.now()-U.run.at;U.run.at=null}else U.run.at=Date.now(); saveU(); sync(); };
   $('#end').onclick=finishAdventure;
   sync();
-  if(isk) sceneStop=IsekaiJourney.start($('.adv .scene'),()=>elapsed()/1000,()=>!U.run?.at,(name,first)=>{
-    $('#place').textContent='◆ '+name; $('#evt').textContent=first?`${name}에서 모험을 시작했다.`:`${name}에 도착했다.`});
+  if(isk) sceneStop=IsekaiJourney.start($('.adv .scene'),()=>elapsed()/1000,()=>!U.run?.at,(name,first,id)=>{
+    const isNew=!visited().includes(id);
+    if(isNew) U.visited=[...visited(),id];
+    U.startPlace=id; saveU();                       // 다음 모험은 마지막으로 도착한 곳에서 이어서
+    $('#place').textContent='◆ '+name;
+    $('#evt').textContent=first?`${name}에서 모험을 시작했다.`:isNew?`새로운 장소 발견! ${name}에 도착했다.`:`${name}에 도착했다.`},U.run.from);
   navigator.wakeLock?.request('screen').then(w=>wake=w).catch(()=>{}); // 패드 화면 꺼짐 방지
 }
 function finishAdventure(){

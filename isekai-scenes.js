@@ -135,7 +135,7 @@ forest:{name:'햇살 숲길',ref:'사진 4',desc:'연두빛 햇살이 비스듬�
       grass(x,W,h*.95,h*1.02,160,['#1f4a1a','#3d7a26','#7fc040'],r,4*u,10*u,2)}]],
   live(c,w,h,t,u){rays(c,w,h,t,[[.02,0,.06,.55,.5],[.12,0,.04,.6,.35],[.22,0,.07,.5,.3]],'255,250,200');drawParts(c,w,h,t,this.p1||(this.p1=makeParts(40,1)),'mote','255,240,160');drawParts(c,w,h,t,this.p2||(this.p2=makeParts(10,2)),'leaf','150,210,70')}},
 
-creek:{name:'반딧불 개울',ref:'사진 2',desc:'어두운 숲 사이로 빛나는 클로버가 피어난 개울. 반딧불이 천천히 떠다닙니다.',
+creek:{name:'빛 클로버 개울',ref:'사진 2',desc:'어두운 숲 사이로 빛나는 클로버가 피어난 개울. 반딧불이 천천히 떠다닙니다.',
   ground:72,rim:'210,255,120',charAfter:2,
   sky(x,w,h){x.fillStyle=vgrad(x,0,h,['#0b2016','#1d4a26','#122a1a']);x.fillRect(0,0,w,h);
     const g=x.createRadialGradient(w*.55,h*.55,0,w*.55,h*.55,h*.6);g.addColorStop(0,'rgba(220,255,90,.75)');g.addColorStop(.4,'rgba(140,210,60,.3)');g.addColorStop(1,'rgba(60,120,40,0)');x.fillStyle=g;x.fillRect(0,0,w,h)},
@@ -174,7 +174,7 @@ river:{name:'노을 강가',ref:'사진 1 · 요청하신 강가',desc:'해가 �
       for(let i=0;i<14;i++){const px=r()*W;rep(W,px,4*u,q=>{x.fillStyle='#3a2a1a';x.beginPath();x.ellipse(q,h*.99-rr(r,8,16)*u,.5*u,2*u,0,0,TAU);x.fill()})}}]],
   live(c,w,h,t,u){shimmer(c,w,h,t,.6,.79,'255,220,170',60,11);drawParts(c,w,h,t,this.p1||(this.p1=makeParts(25,5)),'mote','255,220,160',[.3,.9])}},
 
-cathedral:{name:'버려진 대성당',ref:'사진 5',desc:'덩굴이 뒤덮은 고딕 대성당. 스테인드글라스 사이로 햇빛 기둥이 내려옵니다.',
+cathedral:{name:'스테인드글라스 회랑',ref:'사진 5',desc:'덩굴이 뒤덮은 고딕 대성당. 스테인드글라스 사이로 햇빛 기둥이 내려옵니다.',
   ground:85,rim:'255,245,210',charAfter:2,
   sky(x,w,h){x.fillStyle=vgrad(x,0,h,['#1a2236','#2c3550','#4a4c5e']);x.fillRect(0,0,w,h)},
   layers:[
@@ -207,7 +207,7 @@ cathedral:{name:'버려진 대성당',ref:'사진 5',desc:'덩굴이 뒤덮은 �
       for(let i=0;i<5;i++){const px=r()*W;rep(W,px,12*u,q=>foliage(x,q,h*1.02,rr(r,6,10)*u,rng(i+600),['#1f3f16','#3f7a24','#9fe050'],1.2))}}]],
   live(c,w,h,t,u){rays(c,w,h,t,[[.08,0,.05,.45,.45],[.32,0,.06,.45,.4],[.58,0,.05,.45,.35],[.82,0,.04,.45,.3]],'255,248,215');drawParts(c,w,h,t,this.p1||(this.p1=makeParts(50,6)),'mote','255,245,210');drawParts(c,w,h,t,this.p2||(this.p2=makeParts(8,7)),'petal','255,255,255')}},
 
-worldtree:{name:'세계수 평원',ref:'사진 1',desc:'구름 위까지 솟은 거대한 나무와 계단식 논밭이 펼쳐진 평원. 언덕길에서 내려다봅니다.',
+worldtree:{name:'계단 논 평원',ref:'사진 1',desc:'구름 위까지 솟은 거대한 나무와 계단식 논밭이 펼쳐진 평원. 언덕길에서 내려다봅니다.',
   ground:84,rim:'255,250,220',charAfter:6,
   sky(x,w,h){x.fillStyle=vgrad(x,0,h*.6,['#245ea8','#4f8fd0','#a6d4ef']);x.fillRect(0,0,w,h*.65)},
   layers:[
@@ -359,7 +359,13 @@ crystal:P({img:'crystal',name:'수정 분화구',ref:'새 사진 3',desc:'푸른
           fg(1,26,{y0:.95,bush:{n:5,s:[5,9],pal:['#13260e','#2a5a1c','#7fbf40']},fern:{n:3,col:'#1f4a1a'}},2)],
   live(c,w,h,t,u){drawParts(c,w,h,t,this.p1||(this.p1=makeParts(45,37)),'mote','255,245,210',[.1,.9])}}),
 };
+PHOTO.tavern=P({img:'tavern',name:'모험가의 쉼터',ref:'주점 사진',desc:'모든 모험가가 처음 머무는 주점. 벽난로 불빛이 일렁입니다.',fy:.62,hx:.58,ground:90,scale:.5,rim:'255,190,120',idle:true,layers:[],
+  live(c,w,h,t,u){c.fillStyle=`rgba(255,140,40,${.05+.03*Math.sin(t*7)*Math.sin(t*2.3)})`;c.fillRect(0,0,w,h);drawParts(c,w,h,t,this.p1||(this.p1=makeParts(30,38)),'mote','255,190,110',[.2,.95])}});
 Object.assign(SCENES,PHOTO);
+// 지도 위 위치 (지도 그림 기준 가로·세로 비율)
+const MAP={tavern:[.38,.44],ruins:[.2,.72],'violet-tree':[.55,.06],crystal:[.57,.21],'light-pass':[.3,.1],'flower-cave':[.86,.68],'blue-hill':[.33,.34],'blossom-tree':[.78,.16],
+  'forest-path':[.56,.33],'elf-castle':[.5,.87],'world-tree':[.1,.6],'firefly-creek':[.18,.42],'white-tree':[.68,.65],'sun-forest':[.12,.86],'cathedral-photo':[.07,.27],
+  river:[.08,.73],canyon:[.74,.55],forest:[.62,.95],creek:[.84,.88],cathedral:[.88,.4],worldtree:[.48,.63]};
 
 function cover(c,img,w,h,t,fy){
   if(!img||!img.complete||!img.naturalWidth){c.fillStyle='#111';c.fillRect(0,0,w,h);return}
@@ -367,7 +373,7 @@ function cover(c,img,w,h,t,fy){
   c.drawImage(img,(w-dw)/2+Math.sin(t/31)*w*.01,(h-dh)*fy,dw,dh);
 }
 
-const ORDER=['ruins','violet-tree','crystal','light-pass','flower-cave','blue-hill','blossom-tree','forest-path','elf-castle','world-tree','firefly-creek','white-tree','sun-forest','cathedral-photo','river','canyon','forest','creek','cathedral','worldtree'];   // 15분마다 다음 장소
+const ORDER=['tavern','ruins','violet-tree','crystal','light-pass','flower-cave','blue-hill','blossom-tree','forest-path','elf-castle','world-tree','firefly-creek','white-tree','sun-forest','cathedral-photo','river','canyon','forest','creek','cathedral','worldtree'];   // 15분마다 다음 장소
 const STAY=15, LOOP=STAY*ORDER.length;
 
 /* ───────── 장소를 캔버스 조각으로 미리 그리기 ───────── */
@@ -388,7 +394,7 @@ function free(B){if(!B)return;B.layers.forEach(L=>L.c.width=L.c.height=0);if(B.s
 function draw(c,B,t,alpha=1){
   const{w,h,S}=B,u=h/100;c.save();c.globalAlpha=alpha;
   if(S.img)cover(c,IMG[S.img],w,h,t,S.fy??.5);else c.drawImage(B.sky,0,0,w,h);
-  const H=()=>hero(c,w*(S.hx??.3),h*S.ground/100,u*(S.scale??1),t,S.rim);
+  const H=()=>hero(c,w*(S.hx??.3),h*S.ground/100,u*(S.scale??1),S.idle?0:t,S.rim);
   if(!S.charAfter)H();
   B.layers.forEach((L,i)=>{const off=mod(t*L.speed*u*.6,L.W);c.drawImage(L.c,-off,0,L.W,h);if(L.W-off<w)c.drawImage(L.c,L.W-off,0,L.W,h);
     if(i===S.charAfter-1)H()});
@@ -397,7 +403,8 @@ function draw(c,B,t,alpha=1){
 }
 
 
-function start(cv,getStory,isPaused,onArrive){
+function start(cv,getStory,isPaused,onArrive,from='tavern'){
+  const i0=Math.max(0,ORDER.indexOf(from));
   for(const S of Object.values(PHOTO))if(!IMG[S.img]){const im=new Image();im.src='img/isekai/'+S.img+'.jpg';IMG[S.img]=im}
   const ctx=cv.getContext('2d'),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let W0=0,H0=0,cache={},cur=null,prev=null,fadeAt=0,t=0,last=performance.now(),raf;
@@ -405,8 +412,8 @@ function start(cv,getStory,isPaused,onArrive){
   const get=id=>cache[id]||(cache[id]=build(id,W0,H0));
   const loop=now=>{
     const dt=Math.min(.1,(now-last)/1000);last=now;if(!isPaused()&&!reduce)t+=dt;
-    const id=ORDER[Math.floor(mod(getStory()/60,LOOP)/STAY)];
-    if(id!==cur){prev=cur;cur=id;fadeAt=now;onArrive(SCENES[id].name,!prev);for(const k in cache)if(k!==cur&&k!==prev){free(cache[k]);delete cache[k]}}
+    const id=ORDER[(i0+Math.floor(getStory()/60/STAY))%ORDER.length];
+    if(id!==cur){prev=cur;cur=id;fadeAt=now;onArrive(SCENES[id].name,!prev,id);for(const k in cache)if(k!==cur&&k!==prev){free(cache[k]);delete cache[k]}}
     const k=Math.min(1,(now-fadeAt)/2200);
     if(prev&&k<1)draw(ctx,get(prev),t,1);
     draw(ctx,get(cur),t,prev?k:1);
@@ -416,5 +423,5 @@ function start(cv,getStory,isPaused,onArrive){
   addEventListener('resize',onResize);size();raf=requestAnimationFrame(loop);
   return()=>{cancelAnimationFrame(raf);removeEventListener('resize',onResize);Object.values(cache).forEach(free);cache={}};
 }
-window.IsekaiJourney={start,STAY,places:ORDER.map(id=>SCENES[id].name)};
+window.IsekaiJourney={start,STAY,places:ORDER.map(id=>({id,name:SCENES[id].name,desc:SCENES[id].desc,pos:MAP[id]}))};
 })();
