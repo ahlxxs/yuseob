@@ -373,14 +373,18 @@ const STAY=15, LOOP=STAY*ORDER.length;
 /* ───────── 장소를 캔버스 조각으로 미리 그리기 ───────── */
 function build(id,w,h){
   const S=SCENES[id],u=h/100;
-  const [sky,sx]=mk(w,h);if(S.sky)S.sky(sx,w,h);
+  let sky=null;if(S.sky){let sx;[sky,sx]=mk(w,h);S.sky(sx,w,h)}
   const layers=S.layers.map(([mul,speed,fn,blur],i)=>{const W=Math.ceil(w*mul),M=Math.ceil(Math.min(W/2,70*u));
     const [big,bx]=mk(W+2*M,h);bx.translate(M,0);fn(bx,W,h,rng(i*131+id.length*17),u);
-    const [c,x]=mk(W,h),d=DPR;if(blur)x.filter=`blur(${blur}px)`;   // 흐림은 마지막에 한 번만 (그릴 때마다 하면 매우 느림)x.drawImage(big,M*d,0,W*d,h*d,0,0,W,h);
+    const [c,x]=mk(W,h),d=DPR;
+    if(blur)x.filter=`blur(${blur}px)`;   // 흐림은 마지막에 한 번만 (그릴 때마다 하면 매우 느림)
+    x.drawImage(big,M*d,0,W*d,h*d,0,0,W,h);
     if(speed){x.drawImage(big,0,0,M*d,h*d,W-M,0,M,h);x.drawImage(big,(W+M)*d,0,M*d,h*d,0,0,M,h)}
+    big.width=big.height=0;   // 임시 캔버스 즉시 해제 (아이패드는 캔버스 메모리 한도가 작음)
     return{c,W,speed}});
   return{id,S,sky,layers,w,h};
 }
+function free(B){if(!B)return;B.layers.forEach(L=>L.c.width=L.c.height=0);if(B.sky)B.sky.width=B.sky.height=0}
 function draw(c,B,t,alpha=1){
   const{w,h,S}=B,u=h/100;c.save();c.globalAlpha=alpha;
   if(S.img)cover(c,IMG[S.img],w,h,t,S.fy??.5);else c.drawImage(B.sky,0,0,w,h);
@@ -397,19 +401,20 @@ function start(cv,getStory,isPaused,onArrive){
   for(const S of Object.values(PHOTO))if(!IMG[S.img]){const im=new Image();im.src='img/isekai/'+S.img+'.jpg';IMG[S.img]=im}
   const ctx=cv.getContext('2d'),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let W0=0,H0=0,cache={},cur=null,prev=null,fadeAt=0,t=0,last=performance.now(),raf;
-  const size=()=>{const r=cv.getBoundingClientRect();W0=r.width;H0=r.height;cv.width=W0*DPR;cv.height=H0*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);cache={}};
+  const size=()=>{const r=cv.getBoundingClientRect();W0=r.width;H0=r.height;cv.width=W0*DPR;cv.height=H0*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);Object.values(cache).forEach(free);cache={}};
   const get=id=>cache[id]||(cache[id]=build(id,W0,H0));
   const loop=now=>{
     const dt=Math.min(.1,(now-last)/1000);last=now;if(!isPaused()&&!reduce)t+=dt;
     const id=ORDER[Math.floor(mod(getStory()/60,LOOP)/STAY)];
-    if(id!==cur){prev=cur;cur=id;fadeAt=now;onArrive(SCENES[id].name,!prev);for(const k in cache)if(k!==cur&&k!==prev)delete cache[k]}
+    if(id!==cur){prev=cur;cur=id;fadeAt=now;onArrive(SCENES[id].name,!prev);for(const k in cache)if(k!==cur&&k!==prev){free(cache[k]);delete cache[k]}}
     const k=Math.min(1,(now-fadeAt)/2200);
     if(prev&&k<1)draw(ctx,get(prev),t,1);
     draw(ctx,get(cur),t,prev?k:1);
     raf=requestAnimationFrame(loop)};
-  let rz;const onResize=()=>{clearTimeout(rz);rz=setTimeout(size,150)};
+  // 주소창이 접히는 정도의 작은 높이 변화로는 다시 그리지 않음
+  let rz;const onResize=()=>{clearTimeout(rz);rz=setTimeout(()=>{const r=cv.getBoundingClientRect();if(Math.abs(r.width-W0)>2||Math.abs(r.height-H0)>80)size()},150)};
   addEventListener('resize',onResize);size();raf=requestAnimationFrame(loop);
-  return()=>{cancelAnimationFrame(raf);removeEventListener('resize',onResize)};
+  return()=>{cancelAnimationFrame(raf);removeEventListener('resize',onResize);Object.values(cache).forEach(free);cache={}};
 }
 window.IsekaiJourney={start,STAY,places:ORDER.map(id=>SCENES[id].name)};
 })();
