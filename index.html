@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모험가의 서재</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@700;800&display=swap">
+<style>
+/* Layout: 어두운 서재 책상 위에 펼친 양피지 문서들 — 상단 모험가 명패, 가운데 문서, 하단 탭 */
+:root{
+  --ink:#15120f; --ink-2:#211b16; --ink-3:#2d251e;
+  --parch:#ebe1cb; --parch-2:#dccdaa; --parch-ink:#2e2419; --parch-muted:#7a6a52;
+  --brass:#c4a165; --brass-dim:#7d6640; --light:#efe6d2; --muted:#9a8b72;
+  --ok:#5f8d4e; --warn:#b5462f;
+  --accent:#b8955a; --sky1:#2b2340; --sky2:#c98a5a; --m1:#3a3150; --m2:#2a2238; --m3:#1b1626;
+  --f-display:"Nanum Myeongjo","Gowun Batang",serif;
+  --f-body:"Gowun Batang","Noto Serif KR",serif;
+  --f-latin:"Cinzel","Times New Roman",serif;
+  color-scheme:dark;
+}
+body[data-genre="isekai"]{--accent:#9b7fe0;--sky1:#1d1838;--sky2:#5b3f8f;--m1:#3b3170;--m2:#2a2352;--m3:#171330}
+body[data-genre="medieval"]{--accent:#c0563f;--sky1:#3a2230;--sky2:#d98a4e;--m1:#5a3a3a;--m2:#3d2a2a;--m3:#221816}
+body[data-genre="murim"]{--accent:#4fa58a;--sky1:#1c2a2a;--sky2:#9fb8a6;--m1:#4a6660;--m2:#2f4542;--m3:#172422}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--light);font:16px/1.6 var(--f-body);
+  background-image:radial-gradient(ellipse 70% 45% at 50% 0%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 70%);
+  background-attachment:fixed;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{touch-action:manipulation;cursor:pointer;-webkit-user-select:none;user-select:none}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.3}
+.latin{font-family:var(--f-latin);letter-spacing:.12em;text-transform:uppercase;font-size:.72rem;color:var(--brass)}
+.wrap{max-width:960px;margin:0 auto;padding-block:16px 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+.num{font-variant-numeric:tabular-nums}
+
+/* ornament divider: ─◆─ */
+.orn{display:flex;align-items:center;gap:10px;color:var(--brass);justify-content:center}
+.orn::before,.orn::after{content:"";height:1px;flex:1;max-width:120px;background:linear-gradient(90deg,transparent,currentColor)}
+.orn::after{transform:scaleX(-1)}
+
+/* 양피지 문서 */
+.sheet{position:relative;background:var(--parch);color:var(--parch-ink);padding:24px 20px;
+  background-image:radial-gradient(circle at 20% 10%,rgba(255,255,255,.35),transparent 40%),radial-gradient(circle at 90% 90%,rgba(120,90,40,.18),transparent 50%);
+  box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 18px 40px rgba(0,0,0,.45);border-radius:2px}
+.sheet::before{content:"";position:absolute;inset:6px;border:1px solid rgba(90,70,40,.35);pointer-events:none}
+.sheet .latin{color:var(--parch-muted)}
+.sheet h2{font-size:1.5rem}
+.sheet-title{display:grid;gap:2px;text-align:center;margin-bottom:16px}
+.sheet-title .watermark{font-family:var(--f-latin);font-size:2.4rem;color:rgba(80,60,30,.12);letter-spacing:.1em;line-height:1;margin-bottom:-1.6rem}
+
+/* 장식 프레임 (어두운 면) */
+.frame{position:relative;border:1px solid var(--brass-dim);padding:18px;background:linear-gradient(var(--ink-2),var(--ink))}
+.frame::before,.frame::after{content:"";position:absolute;left:50%;width:9px;height:9px;background:var(--brass);transform:translateX(-50%) rotate(45deg)}
+.frame::before{top:-5px}.frame::after{bottom:-5px}
+
+/* 버튼 */
+.btn{min-height:48px;padding:10px 22px;border:1px solid var(--brass);background:var(--ink-3);color:var(--light);
+  clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,12px 100%,0 50%);display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700}
+.btn.primary{background:var(--brass);color:var(--ink);border-color:var(--brass)}
+.btn.accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:active:not(:disabled){transform:translateY(1px);filter:brightness(1.1)}
+.sheet .btn{background:var(--parch-ink);color:var(--parch)}
+.sheet .btn.primary{background:var(--brass);color:var(--parch-ink)}
+.chip{min-height:44px;padding:8px 14px;border:1px solid var(--brass-dim);background:transparent;border-radius:2px;display:inline-flex;align-items:center;gap:8px}
+.chip[aria-pressed="true"]{background:var(--brass);color:var(--ink);border-color:var(--brass)}
+.sheet .chip{border-color:rgba(90,70,40,.4)}
+.sheet .chip[aria-pressed="true"]{background:var(--parch-ink);color:var(--parch)}
+
+/* 진행 바 (뾰족한 양끝) */
+.bar{position:relative;height:12px;background:rgba(0,0,0,.18);clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 50%,calc(100% - 6px) 100%,6px 100%,0 50%)}
+.bar>i{position:absolute;inset:3px auto 3px 6px;max-width:calc(100% - 12px);background:currentColor;display:block}
+.sheet .bar{color:var(--parch-ink)}
+.bar.done{color:var(--ok)}
+
+/* 인장 아이콘 */
+.seal{width:36px;height:36px;flex:none;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;background:var(--warn);color:#f6e7d0;font-size:1rem;box-shadow:0 0 0 2px rgba(0,0,0,.08) inset}
+
+/* 상단 명패 */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:rgba(21,18,15,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--brass-dim)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ink)}
+.topbar .in{max-width:960px;margin:0 auto;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:12px}
+.crest{width:46px;height:52px;flex:none;display:grid;place-items:center;font-size:1.4rem;background:var(--accent);color:#fff;clip-path:polygon(0 0,100% 0,100% 72%,50% 100%,0 72%)}
+.topbar .who{min-width:0;flex:1}
+.topbar .who b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .who small{color:var(--muted)}
+.power{text-align:right}.power b{font-family:var(--f-latin);font-size:1.15rem;color:var(--brass)}
+
+/* 하단 탭 */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--ink-2);border-top:1px solid var(--brass-dim);
+  padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.tabs .in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+.tabs button{min-height:64px;background:none;border:0;display:grid;place-items:center;gap:0;color:var(--muted);font-size:.85rem}
+.tabs button span{font-size:1.3rem;line-height:1}
+.tabs button[aria-current="page"]{color:var(--brass);background:linear-gradient(transparent,color-mix(in srgb,var(--brass) 14%,transparent))}
+
+/* 온보딩 */
+.hero{text-align:center;display:grid;gap:8px;padding-top:24px}
+.hero h1{font-size:clamp(1.9rem,6vw,2.8rem);color:var(--light)}
+.hero p{color:var(--muted);margin:0}
+.field{display:grid;gap:6px}
+.field label{font-weight:700}
+.field input,.field select,.field textarea{min-height:48px;padding:10px 12px;background:rgba(255,255,255,.55);border:1px solid rgba(90,70,40,.4);border-radius:2px;color:var(--parch-ink)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+/* 장르 배너 (방패형) */
+.banners{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.banner{position:relative;border:0;padding:0;background:var(--brass-dim);clip-path:polygon(0 0,100% 0,100% 82%,50% 100%,0 82%);text-align:center;min-height:300px;color:var(--light)}
+.banner>div{position:absolute;inset:2px;clip-path:polygon(0 0,100% 0,100% 82%,50% 100%,0 82%);padding:28px 18px 60px;display:grid;align-content:start;gap:10px;
+  background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--g) 45%,transparent),transparent 65%),var(--ink-2)}
+.banner .sym{font-size:3rem;line-height:1.2}
+.banner h3{font-size:1.5rem}
+.banner p{margin:0;color:var(--muted);font-size:.92rem}
+.banner:active>div,.banner[aria-pressed="true"]>div{background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--g) 75%,transparent),transparent 70%),var(--ink-3)}
+.banner[aria-pressed="true"]{background:var(--brass)}
+
+/* 직업 카드 */
+.tier{display:grid;gap:12px}
+.tier>h3{font-size:1rem;color:var(--brass)}
+.classes{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.cls{display:grid;gap:10px;align-content:start;background:rgba(255,255,255,.35);border:1px solid rgba(90,70,40,.3);padding:14px}
+.cls.cur{outline:2px solid var(--accent);outline-offset:-2px}
+.cls.locked{background:rgba(40,30,20,.08)}
+.cls .head{display:flex;gap:12px;align-items:center}
+.cls .icon{width:48px;height:54px;flex:none;display:grid;place-items:center;font-size:1.5rem;background:var(--parch-ink);color:var(--parch);clip-path:polygon(0 0,100% 0,100% 72%,50% 100%,0 72%)}
+.cls.hidden-c .icon{background:#3b2a4d}
+.cls p{margin:0;font-size:.92rem;color:var(--parch-muted)}
+.req{display:grid;gap:6px;font-size:.88rem}
+.req .r{display:grid;grid-template-columns:1fr auto;gap:2px 8px}
+.req .r .bar{grid-column:1/-1}
+.tag{font-size:.75rem;padding:1px 8px;border:1px solid currentColor;border-radius:2px;white-space:nowrap}
+
+/* 상태창 */
+.status{display:grid;gap:20px;grid-template-columns:1fr}
+@media (min-width:760px){.status{grid-template-columns:260px 1fr}}
+.portrait{display:grid;gap:10px;justify-items:center;text-align:center;align-content:start}
+.portrait .crest{width:120px;height:140px;font-size:3.4rem}
+.portrait h2{font-size:1.6rem}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;width:100%;text-align:left;font-size:.92rem}
+.kv dt{color:var(--parch-muted)}.kv dd{margin:0;text-align:right}
+.stats{display:grid;gap:14px}
+.stat{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center}
+.stat .bar{grid-column:2/-1}
+.stat .lv{font-family:var(--f-latin);font-weight:700}
+.inv{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
+.slot{aspect-ratio:1;max-width:100%;display:grid;place-items:center;align-content:center;gap:2px;background:rgba(255,255,255,.4);border:1px solid rgba(90,70,40,.3);text-align:center;font-size:.78rem;padding:6px;position:relative}
+.slot .e{font-size:1.8rem;line-height:1.1}
+.slot .n{position:absolute;right:6px;bottom:2px;font-family:var(--f-latin)}
+.slot.r-희귀{box-shadow:0 0 0 2px #4d6fb3 inset}.slot.r-전설{box-shadow:0 0 0 2px #c08a2b inset;background:rgba(255,230,170,.5)}
+.log{display:grid;gap:4px;font-size:.9rem;margin:0;padding:0;list-style:none}
+.log li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed rgba(90,70,40,.25);padding:4px 0}
+
+/* 모험 출발 */
+.start{display:grid;gap:16px;text-align:center}
+.today{font-family:var(--f-latin);font-size:2.2rem;color:var(--brass)}
+
+/* 모험중 화면 */
+.adv{position:fixed;inset:0;z-index:20;background:linear-gradient(var(--sky1),var(--sky2));overflow:hidden;display:grid;grid-template-rows:1fr auto}
+.adv .moon{position:absolute;top:12%;right:14%;width:70px;height:70px;border-radius:50%;background:#f3e7c4;box-shadow:0 0 50px 10px rgba(243,231,196,.35)}
+body[data-genre="isekai"] .adv .moon::after{content:"";position:absolute;width:30px;height:30px;border-radius:50%;background:#b8a6ff;left:-60px;top:30px;box-shadow:0 0 30px rgba(184,166,255,.6)}
+.adv .stars{position:absolute;inset:0 0 50% 0;background-image:radial-gradient(1px 1px at 10% 20%,#fff,transparent),radial-gradient(1px 1px at 30% 60%,#fff,transparent),radial-gradient(1.5px 1.5px at 55% 25%,#fff,transparent),radial-gradient(1px 1px at 75% 50%,#fff,transparent),radial-gradient(1px 1px at 90% 15%,#fff,transparent);opacity:.7;animation:twinkle 4s ease-in-out infinite alternate}
+.layer{position:absolute;left:0;right:0;bottom:0;background:var(--c);-webkit-mask:var(--m) repeat-x 0 100%/var(--w) 100%;mask:var(--m) repeat-x 0 100%/var(--w) 100%;animation:scroll var(--t) linear infinite}
+.l1{--c:var(--m1);--t:90s;--w:600px;height:55%;--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 200' preserveAspectRatio='none'%3E%3Cpath d='M0 200V110L70 50l60 50 90-80 80 70 70-40 90 60 60-30 80 50v60z'/%3E%3C/svg%3E")}
+.l2{--c:var(--m2);--t:45s;--w:500px;height:38%;--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 200' preserveAspectRatio='none'%3E%3Cpath d='M0 200V120q60-70 130-20t120-10 120 0 130 20v90z'/%3E%3C/svg%3E")}
+.l3{--c:var(--m3);--t:20s;--w:360px;height:26%;--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 200' preserveAspectRatio='none'%3E%3Cpath d='M0 200V140l20-50 20 50h20l25-80 25 80h40l18-40 18 40h50l30-90 30 90h40l20-50 20 50h24v60z'/%3E%3C/svg%3E")}
+.ground{position:absolute;left:0;right:0;bottom:0;height:12%;background:#0e0b09;overflow:hidden}
+.ground::after{content:"";position:absolute;left:0;right:0;top:40%;height:3px;background:repeating-linear-gradient(90deg,rgba(255,240,200,.25) 0 26px,transparent 26px 60px);background-size:60px 3px;animation:road 1.2s linear infinite}
+.hero-walk{position:absolute;left:22%;bottom:11%;display:grid;justify-items:center}
+.hero-walk .body{width:58px;height:66px;display:grid;place-items:center;font-size:1.8rem;background:var(--accent);color:#fff;clip-path:polygon(0 0,100% 0,100% 72%,50% 100%,0 72%);animation:bob .5s ease-in-out infinite alternate}
+.hero-walk .shadow{width:44px;height:8px;border-radius:50%;background:rgba(0,0,0,.45);margin-top:4px}
+.fly{position:absolute;width:5px;height:5px;border-radius:50%;background:#ffe9a8;box-shadow:0 0 10px #ffd36b;animation:float 6s ease-in-out infinite}
+.adv .hud{position:relative;z-index:2;display:grid;justify-items:center;align-content:start;gap:6px;padding-top:max(40px,env(safe-area-inset-top,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));text-align:center;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.adv .going{font-family:var(--f-display);font-size:clamp(1.6rem,5vw,2.4rem)}
+.adv .going i{display:inline-block;animation:dot 1.4s infinite;font-style:normal}
+.adv .going i:nth-child(2){animation-delay:.2s}.adv .going i:nth-child(3){animation-delay:.4s}
+.adv .clock{font-family:var(--f-latin);font-size:clamp(2.8rem,11vw,5rem);letter-spacing:.06em;line-height:1.1}
+.adv .event{min-height:3.2em;max-width:34ch;color:#f3e7c4;font-size:1rem}
+.adv .ctrl{position:relative;z-index:2;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;padding:20px max(16px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.adv.paused .layer,.adv.paused .ground::after,.adv.paused .body{animation-play-state:paused}
+@keyframes scroll{to{-webkit-mask-position:calc(-1 * var(--w)) 100%;mask-position:calc(-1 * var(--w)) 100%}}
+@keyframes road{to{background-position:-60px 0}}
+@keyframes bob{to{transform:translateY(-6px)}}
+@keyframes dot{0%,100%{opacity:.2}50%{opacity:1}}
+@keyframes twinkle{to{opacity:.35}}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-30px)}}
+
+/* 모달 */
+.modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.65);display:grid;place-items:center;padding:16px}
+.modal .sheet{width:min(440px,100%);text-align:center;display:grid;gap:14px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--parch);color:var(--parch-ink);padding:10px 18px;border:1px solid var(--brass);max-width:calc(100% - 32px)}
+
+/* 관리자 */
+.admin .tabs-a{display:flex;flex-wrap:wrap;gap:8px}
+.admin table{width:100%;border-collapse:collapse;font-size:.92rem}
+.admin td,.admin th{padding:8px 6px;border-bottom:1px solid rgba(90,70,40,.25);text-align:left;vertical-align:top}
+.admin .scroll{overflow-x:auto}
+.admin form{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.admin form .wide{grid-column:1/-1}
+.admin .reqs{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.admin .reqs label{display:flex;gap:6px;align-items:center;font-weight:400}
+.admin .reqs input[type=number]{width:70px;min-height:40px}
+.admin textarea{width:100%;min-height:160px;font-family:ui-monospace,monospace;font-size:.8rem}
+.note{font-size:.85rem;color:var(--parch-muted);margin:0}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="topbar" id="top" hidden></header>
+<main class="wrap" id="view"></main>
+<nav class="tabs" id="tabs" hidden><div class="in">
+  <button data-go="home"><span>⚔</span>모험</button>
+  <button data-go="classes"><span>♜</span>전직소</button>
+  <button data-go="status"><span>❖</span>상태창</button>
+</div></nav>
+<div id="layer"></div>
+
+<script>
+/* ───────── 기본 데이터 (관리자 페이지에서 수정 가능) ───────── */
+const DEFAULT_DATA = {
+  subjects:[
+    {id:'kor',name:'국어',icon:'國'},{id:'eng',name:'영어',icon:'英'},{id:'math',name:'수학',icon:'數'},
+    {id:'sci',name:'과학',icon:'科'},{id:'soc',name:'사회',icon:'社'},{id:'etc',name:'기타',icon:'雜'}],
+  genres:[
+    {id:'isekai',name:'이세계',sym:'☽',color:'#9b7fe0',desc:'트럭에 치인 뒤 눈을 떠보니 마법과 스킬창이 있는 세계. 레벨업이 곧 생존이다.'},
+    {id:'medieval',name:'중세 판타지',sym:'♜',color:'#c0563f',desc:'왕국과 기사단, 용과 성배. 검과 신앙으로 이름을 남겨라.'},
+    {id:'murim',name:'무협',sym:'劍',color:'#4fa58a',desc:'강호에 첫발을 내디딘 무명소졸. 내공을 쌓아 천하제일을 노려라.'}],
+  items:[
+    {id:'map',name:'낡은 지도',icon:'🗺️',rarity:'일반',drop:12,genre:''},
+    {id:'potion',name:'회복 물약',icon:'🧪',rarity:'일반',drop:15,genre:''},
+    {id:'horn',name:'마왕의 뿔',icon:'😈',rarity:'전설',drop:2,genre:'isekai'},
+    {id:'stone',name:'현자의 돌',icon:'💎',rarity:'희귀',drop:4,genre:'isekai'},
+    {id:'scale',name:'용의 비늘',icon:'🐉',rarity:'희귀',drop:4,genre:'medieval'},
+    {id:'grail',name:'성배',icon:'🏆',rarity:'전설',drop:2,genre:'medieval'},
+    {id:'manual',name:'천마신공 비급',icon:'📕',rarity:'전설',drop:2,genre:'murim'},
+    {id:'jade',name:'검선의 옥패',icon:'🟢',rarity:'희귀',drop:4,genre:'murim'}],
+  classes:[
+    {id:'is0',genre:'isekai',name:'견습 전생자',icon:'✦',tier:0,desc:'아직 스킬창 보는 법도 모르는 신입 전생자.',req:{},items:[],hidden:false},
+    {id:'is1',genre:'isekai',name:'용사',icon:'⚔',tier:1,desc:'여신에게 선택받은 자. 균형 잡힌 실력이 필요하다.',req:{math:5,kor:5},items:[],hidden:false},
+    {id:'is2',genre:'isekai',name:'대마법사',icon:'✺',tier:1,desc:'수식으로 마법진을 그리는 학자형 마법사.',req:{sci:8,math:5},items:[],hidden:false},
+    {id:'is3',genre:'isekai',name:'성녀',icon:'✚',tier:1,desc:'말과 기도로 사람을 치유한다.',req:{kor:6,soc:6},items:[],hidden:false},
+    {id:'is4',genre:'isekai',name:'테이머',icon:'❦',tier:1,desc:'이계의 생물과 말을 나누는 자.',req:{sci:5,eng:5},items:[],hidden:false},
+    {id:'is9',genre:'isekai',name:'마왕',icon:'♛',tier:2,desc:'용사를 기다리던 왕좌의 주인. 마왕의 뿔이 열쇠다.',req:{math:20},items:['horn'],hidden:true},
+    {id:'is8',genre:'isekai',name:'현자',icon:'☯',tier:2,desc:'모든 학문을 꿰뚫은 자만이 현자의 돌을 다룬다.',req:{kor:10,eng:10,math:10,sci:10,soc:10},items:['stone'],hidden:true},
+    {id:'md0',genre:'medieval',name:'견습 종자',icon:'✦',tier:0,desc:'기사의 갑옷을 닦으며 꿈을 키우는 소년소녀.',req:{},items:[],hidden:false},
+    {id:'md1',genre:'medieval',name:'기사',icon:'⛨',tier:1,desc:'왕국의 법과 역사를 지키는 방패.',req:{soc:6,kor:4},items:[],hidden:false},
+    {id:'md2',genre:'medieval',name:'궁수',icon:'➶',tier:1,desc:'바람과 거리를 계산해 화살을 쏜다.',req:{math:6,sci:4},items:[],hidden:false},
+    {id:'md3',genre:'medieval',name:'사제',icon:'✝',tier:1,desc:'고대어 경전을 읽는 신의 대리인.',req:{kor:6,eng:4},items:[],hidden:false},
+    {id:'md4',genre:'medieval',name:'연금술사',icon:'⚗',tier:1,desc:'납을 금으로 바꾸려는 집념의 실험가.',req:{sci:8,math:4},items:[],hidden:false},
+    {id:'md9',genre:'medieval',name:'드래곤 슬레이어',icon:'♞',tier:2,desc:'용의 비늘을 증표로 지닌 전설의 사냥꾼.',req:{soc:12,sci:12},items:['scale'],hidden:true},
+    {id:'md8',genre:'medieval',name:'성배의 기사',icon:'♔',tier:2,desc:'성배를 찾아낸 단 한 명의 기사.',req:{kor:15,soc:15},items:['grail'],hidden:true},
+    {id:'mr0',genre:'murim',name:'강호초출',icon:'✦',tier:0,desc:'봇짐 하나 메고 강호에 나선 풋내기.',req:{},items:[],hidden:false},
+    {id:'mr1',genre:'murim',name:'검객',icon:'劍',tier:1,desc:'일검에 모든 것을 담는다.',req:{math:6,kor:4},items:[],hidden:false},
+    {id:'mr2',genre:'murim',name:'권사',icon:'拳',tier:1,desc:'맨주먹으로 세상을 논한다.',req:{soc:6,sci:4},items:[],hidden:false},
+    {id:'mr3',genre:'murim',name:'의원',icon:'醫',tier:1,desc:'침 한 대로 생사를 가른다.',req:{sci:6,kor:4},items:[],hidden:false},
+    {id:'mr4',genre:'murim',name:'책사',icon:'策',tier:1,desc:'붓 한 자루로 천군만마를 움직인다.',req:{kor:6,soc:6},items:[],hidden:false},
+    {id:'mr9',genre:'murim',name:'천마',icon:'魔',tier:2,desc:'천마신공을 대성한 마교의 주인.',req:{math:15,sci:15},items:['manual'],hidden:true},
+    {id:'mr8',genre:'murim',name:'검선',icon:'仙',tier:2,desc:'검으로 신선의 경지에 오른 자.',req:{kor:15,math:15},items:['jade'],hidden:true}],
+  events:{
+    isekai:['슬라임 무리를 조용히 지나쳤다.','길드 게시판에서 새 의뢰를 발견했다.','스킬창에 낯선 알림이 떴다.','엘프 상인이 길을 알려주었다.','하늘에 달이 두 개 떠 있다.'],
+    medieval:['성문 앞에서 통행증을 보였다.','여관 난롯가에서 잠시 숨을 골랐다.','멀리서 용의 포효가 들린다.','순례자와 길을 함께했다.','오래된 성채의 문장을 발견했다.'],
+    murim:['객잔에서 차 한 잔을 마셨다.','대나무 숲에서 검기를 느꼈다.','산적 무리가 길을 비켜섰다.','폭포 아래에서 내공을 다졌다.','표국의 마차와 스쳐 지나갔다.']}
+};
+
+/* ───────── 저장소 ───────── */
+const store = {
+  get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch{return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+};
+let D = store.get('ft_data', structuredClone(DEFAULT_DATA));
+let U = store.get('ft_user', null);
+const saveU = () => store.set('ft_user', U);
+const saveD = () => store.set('ft_data', D);
+
+/* ───────── 도우미 ───────── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const find = (list,id) => D[list].find(x=>x.id===id);
+const hm = min => { min=Math.floor(min); const h=Math.floor(min/60), m=min%60; return h ? `${h}시간 ${m}분` : `${m}분`; };
+const lv = min => Math.floor(Math.sqrt(min/15))+1;              // 15분→Lv2, 1h→Lv3, 10h→Lv7, 100h→Lv26
+const lvMin = l => 15*(l-1)**2;
+const totalMin = () => Object.values(U.study).reduce((a,b)=>a+b,0);
+const myClass = () => find('classes',U.classId);
+const power = () => Math.round(totalMin()*10 + (myClass()?.tier||0)*500 + Object.values(U.study).reduce((a,m)=>a+lv(m)*50,0));
+const meetsReq = c => Object.entries(c.req||{}).every(([s,h])=>!find('subjects',s) || (U.study[s]||0)/60 >= h) && (c.items||[]).every(i=>U.items[i]>0);
+const revealed = c => !c.hidden || U.classId===c.id || (c.items||[]).some(i=>U.items[i]>0);
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.append(t);setTimeout(()=>t.remove(),2400)}
+
+/* ───────── 라우팅 ───────── */
+let view = 'home', obStep = 1, editingProfile = false;
+function go(v){ view=v; render(); scrollTo(0,0); }
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+addEventListener('hashchange',render);
+
+function render(){
+  if(location.hash==='#admin') return renderAdmin();
+  const ob = !U || !U.genre || editingProfile;
+  $('#top').hidden = $('#tabs').hidden = ob;
+  document.body.dataset.genre = U?.genre || '';
+  if(ob) return renderOnboarding();
+  if(!find('genres',U.genre)){ U.genre=null; saveU(); return render(); } // 관리자가 장르를 지운 경우
+  renderTop();
+  document.querySelectorAll('[data-go]').forEach(b=>b.setAttribute('aria-current', b.dataset.go===view?'page':'false'));
+  ({home:renderHome,classes:renderClasses,status:renderStatus})[view]();
+  if(U.run) openAdventure();
+}
+
+function renderTop(){
+  const c=myClass(), g=find('genres',U.genre);
+  $('#top').innerHTML=`<div class="in">
+    <div class="crest">${esc(c?.icon||'?')}</div>
+    <div class="who"><b>${esc(U.name)} <small>${U.gender==='m'?'♂':'♀'}</small></b><small>${esc(g.name)} · ${esc(c?.name||'무직')}</small></div>
+    <div class="power"><div class="latin">Power</div><b class="num">${power().toLocaleString()}</b></div></div>`;
+}
+
+/* ───────── 1. 온보딩: 모험가 등록 → 장르 선택 ───────── */
+function renderOnboarding(){
+  const v=$('#view');
+  if(obStep===1 || !U || editingProfile){
+    v.innerHTML=`<div class="hero"><div class="latin">Adventurer's Registry</div><h1>모험가 등록</h1><p>공부한 시간만큼 강해지는 모험이 시작됩니다.</p></div>
+    <form class="sheet" id="reg" style="display:grid;gap:18px;max-width:520px;width:100%;margin:0 auto">
+      <div class="sheet-title"><span class="watermark">REGISTRY</span><h2>길드 등록서</h2></div>
+      <div class="field"><label for="nm">이름</label><input id="nm" maxlength="12" required placeholder="모험가 이름 (최대 12자)" value="${esc(U?.name||'')}"></div>
+      <div class="field"><label>성별</label><div class="row" id="gd">
+        <button type="button" class="chip" data-g="m" aria-pressed="${U?.gender==='m'}">♂ 남성</button>
+        <button type="button" class="chip" data-g="f" aria-pressed="${U?.gender==='f'}">♀ 여성</button></div></div>
+      <button class="btn primary">다음 — 세계 선택</button>
+    </form>`;
+    let gender=U?.gender;
+    v.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{gender=b.dataset.g;v.querySelectorAll('[data-g]').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+    $('#reg').onsubmit=e=>{e.preventDefault();const name=$('#nm').value.trim();
+      if(!name) return toast('이름을 입력해 주세요.'); if(!gender) return toast('성별을 선택해 주세요.');
+      U={...(U||{study:{},items:{},log:[],carry:0}),name,gender}; saveU();
+      if(editingProfile){editingProfile=false;return go('status')} obStep=2; render();};
+    return;
+  }
+  v.innerHTML=`<div class="hero"><div class="latin">Choose your world</div><h1>어느 세계로 떠나시겠습니까?</h1><p>세계마다 전직할 수 있는 직업과 얻을 수 있는 유물이 다릅니다.</p></div>
+    <div class="banners">${D.genres.map(g=>`<button class="banner" data-id="${g.id}" style="--g:${esc(g.color)}"><div>
+      <div class="sym">${esc(g.sym||'✦')}</div><h3>${esc(g.name)}</h3><p>${esc(g.desc)}</p>
+      <p class="latin">${D.classes.filter(c=>c.genre===g.id&&!c.hidden).length} classes</p></div></button>`).join('')}</div>
+    <div class="row" style="justify-content:center"><button class="btn" id="back">← 이름 다시 쓰기</button></div>`;
+  $('#back').onclick=()=>{obStep=1;render()};
+  v.querySelectorAll('.banner').forEach(b=>b.onclick=()=>pickGenre(b.dataset.id));
+}
+function pickGenre(id){
+  U.genre=id;
+  U.classId=(D.classes.filter(c=>c.genre===id).sort((a,b)=>a.tier-b.tier)[0]||{}).id;
+  saveU(); view='classes'; render();
+  toast(`${find('genres',id).name}에 도착했습니다. 전직 조건을 확인해 보세요.`);
+}
+
+/* ───────── 2. 모험 (공부 시작) ───────── */
+let pickedSubj = null;
+function renderHome(){
+  const today=new Date().toDateString();
+  const todayMin=U.log.filter(l=>new Date(l.t).toDateString()===today).reduce((a,l)=>a+l.m,0);
+  pickedSubj = pickedSubj && find('subjects',pickedSubj) ? pickedSubj : D.subjects[0]?.id;
+  $('#view').innerHTML=`
+  <section class="frame start">
+    <div class="latin">Today's journey</div>
+    <div class="today num">${hm(todayMin)}</div>
+    <div class="orn">✦</div>
+    <p style="margin:0">어떤 과목으로 모험을 떠날까요?</p>
+    <div class="row" style="justify-content:center" id="subs">${D.subjects.map(s=>`<button class="chip" data-s="${s.id}" aria-pressed="${s.id===pickedSubj}"><span class="seal" style="width:26px;height:26px;font-size:.8rem">${esc(s.icon)}</span>${esc(s.name)}</button>`).join('')}</div>
+    <div><button class="btn accent" id="go" style="min-width:220px;min-height:56px;font-size:1.1rem">⚔ 모험 떠나기</button></div>
+    <p class="note" style="color:var(--muted)">10분 모험할 때마다 유물을 발견할 기회가 있습니다.</p>
+  </section>
+  <section class="sheet"><div class="sheet-title"><h2>최근 모험 일지</h2></div>${logList(8)}</section>`;
+  document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{pickedSubj=b.dataset.s;document.querySelectorAll('[data-s]').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  $('#go').onclick=()=>{ if(!pickedSubj) return; U.run={s:pickedSubj,acc:0,at:Date.now()}; saveU(); openAdventure(); };
+}
+function logList(n){
+  if(!U.log.length) return `<p class="note">아직 기록이 없습니다. 첫 모험을 떠나 보세요.</p>`;
+  return `<ul class="log">${U.log.slice(-n).reverse().map(l=>`<li><span>${esc(find('subjects',l.s)?.name||'?')} ${l.item?`· ${esc(find('items',l.item)?.icon||'')} 획득`:''}</span><span class="num">${hm(l.m)} · ${new Date(l.t).toLocaleDateString('ko-KR',{month:'short',day:'numeric'})}</span></li>`).join('')}</ul>`;
+}
+
+/* ───────── 모험중… 화면 ───────── */
+let tick=null, wake=null;
+const elapsed = () => U.run.acc + (U.run.at ? Date.now()-U.run.at : 0);
+function openAdventure(){
+  if($('.adv')) return;
+  const c=myClass(), s=find('subjects',U.run.s);
+  const ev=D.events?.[U.genre]||['길을 따라 걸었다.'];
+  $('#layer').innerHTML=`<div class="adv" role="dialog" aria-label="모험중">
+    <div class="stars"></div><div class="moon"></div>
+    ${[...Array(6)].map((_,i)=>`<i class="fly" style="left:${10+i*15}%;top:${45+(i%3)*10}%;animation-delay:${i*.9}s"></i>`).join('')}
+    <div class="layer l1"></div><div class="layer l2"></div><div class="layer l3"></div><div class="ground"></div>
+    <div class="hero-walk"><div class="body">${esc(c?.icon||'✦')}</div><div class="shadow"></div></div>
+    <div class="hud"><div class="latin" style="color:#f3e7c4">${esc(s?.name||'')} · ${esc(c?.name||'')}</div>
+      <div class="going">모험중<i>.</i><i>.</i><i>.</i></div>
+      <div class="clock num" id="clk">00:00:00</div>
+      <div class="event" id="evt">${esc(ev[0])}</div></div>
+    <div class="ctrl"><button class="btn" id="pz">일시정지</button><button class="btn primary" id="end">귀환하기</button></div></div>`;
+  const adv=$('.adv'), pz=$('#pz');
+  const sync=()=>{adv.classList.toggle('paused',!U.run.at); pz.textContent=U.run.at?'일시정지':'다시 출발'};
+  let n=0;
+  tick=setInterval(()=>{
+    const t=Math.floor(elapsed()/1000);
+    $('#clk').textContent=[t/3600,t/60%60,t%60].map(x=>String(Math.floor(x)).padStart(2,'0')).join(':');
+    if(U.run.at && t>0 && t%45===0) $('#evt').textContent=ev[++n%ev.length];
+  },250);
+  pz.onclick=()=>{ if(U.run.at){U.run.acc+=Date.now()-U.run.at;U.run.at=null}else U.run.at=Date.now(); saveU(); sync(); };
+  $('#end').onclick=finishAdventure;
+  sync();
+  navigator.wakeLock?.request('screen').then(w=>wake=w).catch(()=>{}); // 패드 화면 꺼짐 방지
+}
+function finishAdventure(){
+  const min=Math.floor(elapsed()/60000), s=U.run.s;
+  clearInterval(tick); wake?.release().catch(()=>{}); wake=null;
+  U.run=null; $('#layer').innerHTML='';
+  if(min<1){ saveU(); render(); return toast('1분 이상 모험해야 기록됩니다.'); }
+  const before=lv(U.study[s]||0);
+  U.study[s]=(U.study[s]||0)+min;
+  // 10분 단위로 유물 굴림 (남은 분은 다음 모험으로 이월)
+  U.carry=(U.carry||0)+min; let rolls=Math.floor(U.carry/10); U.carry%=10;
+  const got=[];
+  const pool=D.items.filter(i=>!i.genre||i.genre===U.genre);
+  while(rolls-- > 0){ const it=pool.find(i=>Math.random()*100<i.drop); if(it){U.items[it.id]=(U.items[it.id]||0)+1;got.push(it)} }
+  U.log.push({s,m:min,t:Date.now(),item:got[0]?.id});
+  U.log=U.log.slice(-200);
+  saveU(); render();
+  const after=lv(U.study[s]), subj=find('subjects',s);
+  const ready=D.classes.filter(c=>c.genre===U.genre&&c.id!==U.classId&&meetsReq(c)&&c.tier>(myClass()?.tier??0));
+  modal(`<div class="latin">Return</div><h2>무사히 귀환했습니다</h2>
+    <p style="margin:0">${esc(subj?.name)} <b>${hm(min)}</b> 모험 완료${after>before?`<br><b>${esc(subj?.name)} 숙련도 Lv.${before} → Lv.${after}</b>`:''}</p>
+    ${got.length?`<div class="orn">✦ 발견한 유물 ✦</div><div class="inv">${got.map(slot).join('')}</div>`:`<p class="note">이번 모험에서는 유물을 찾지 못했습니다.</p>`}
+    ${ready.length?`<p style="margin:0"><b>${ready.map(c=>esc(c.name)).join(', ')}</b> 전직 조건을 달성했습니다!</p>`:''}
+    <button class="btn primary" data-close>${ready.length?'전직소로 가기':'확인'}</button>`, ()=>{ if(ready.length) go('classes') });
+}
+function modal(html,onClose){
+  $('#layer').innerHTML=`<div class="modal"><div class="sheet">${html}</div></div>`;
+  $('#layer [data-close]').onclick=()=>{$('#layer').innerHTML='';onClose?.()};
+}
+const slot = (it,n) => `<div class="slot r-${esc(it.rarity)}"><span class="e">${esc(it.icon)}</span>${esc(it.name)}${n>1?`<span class="n">×${n}</span>`:''}</div>`;
+
+/* ───────── 3. 전직소 ───────── */
+function renderClasses(){
+  const g=find('genres',U.genre);
+  const list=D.classes.filter(c=>c.genre===U.genre);
+  const tiers=[...new Set(list.map(c=>c.tier))].sort((a,b)=>a-b);
+  const tierName=t=>['기본 직업','1차 전직','2차 전직 · 히든'][t]||`${t}차 전직`;
+  $('#view').innerHTML=`<section class="sheet">
+    <div class="sheet-title"><span class="watermark">CLASS</span><div class="latin">${esc(g.name)}</div><h2>전직소</h2></div>
+    <div style="display:grid;gap:22px">${tiers.map(t=>`<div class="tier"><h3>${tierName(t)}</h3><div class="classes">${list.filter(c=>c.tier===t).map(classCard).join('')}</div></div>`).join('')}</div>
+    <div class="orn" style="color:var(--parch-muted);margin:22px 0 12px">✦</div>
+    <div class="row" style="justify-content:center"><button class="btn" id="chg">다른 세계로 이동</button></div>
+    <p class="note" style="text-align:center;margin-top:8px">세계를 옮기면 그 세계의 기본 직업부터 다시 시작합니다. 공부 시간과 유물은 유지됩니다.</p></section>`;
+  document.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{
+    const c=find('classes',b.dataset.cls); U.classId=c.id; saveU(); render();
+    modal(`<div class="latin">Class change</div><div class="crest" style="margin:0 auto;width:90px;height:104px;font-size:2.6rem">${esc(c.icon)}</div><h2>${esc(c.name)}(으)로 전직했습니다</h2><p class="note">${esc(c.desc)}</p><button class="btn primary" data-close>확인</button>`);
+  });
+  let armed=false;
+  $('#chg').onclick=e=>{ if(!armed){armed=true;e.target.textContent='한 번 더 누르면 이동합니다';return} U.genre=null; obStep=2; saveU(); render(); };
+}
+function classCard(c){
+  if(!revealed(c)) return `<div class="cls locked hidden-c"><div class="head"><div class="icon">?</div><div><b>??? 히든 직업</b><p>어딘가의 유물이 이 길을 열어줄 것이다…</p></div></div></div>`;
+  const cur=c.id===U.classId, ok=meetsReq(c);
+  const reqs=Object.entries(c.req||{}).map(([s,h])=>{const sj=find('subjects',s); if(!sj) return '';
+    const have=(U.study[s]||0)/60, p=Math.min(1,have/h);
+    return `<div class="r"><span>${esc(sj.name)}</span><span class="num">${have.toFixed(1)} / ${h}h</span><div class="bar ${p>=1?'done':''}"><i style="width:${p*100}%"></i></div></div>`}).join('');
+  const its=(c.items||[]).map(i=>{const it=find('items',i);return it?`<span class="tag" style="${U.items[i]?'color:var(--ok)':''}">${esc(it.icon)} ${esc(it.name)} ${U.items[i]?'✓':''}</span>`:''}).join(' ');
+  return `<div class="cls ${cur?'cur':''} ${c.hidden?'hidden-c':''}">
+    <div class="head"><div class="icon">${esc(c.icon)}</div><div style="min-width:0"><b>${esc(c.name)}</b> ${c.hidden?'<span class="tag" style="color:#6b4a91">HIDDEN</span>':''}<p>${esc(c.desc)}</p></div></div>
+    ${reqs||its?`<div class="req">${reqs}${its?`<div class="row" style="gap:6px">${its}</div>`:''}</div>`:''}
+    ${cur?`<span class="tag" style="justify-self:start;color:var(--accent)">현재 직업</span>`:`<button class="btn primary" data-cls="${c.id}" ${ok?'':'disabled'}>${ok?'전직하기':'조건 미달'}</button>`}</div>`;
+}
+
+/* ───────── 4. 상태창 ───────── */
+function renderStatus(){
+  const c=myClass(), g=find('genres',U.genre);
+  const owned=D.items.filter(i=>U.items[i.id]>0);
+  $('#view').innerHTML=`<section class="sheet">
+    <div class="sheet-title"><span class="watermark">STATUS</span><h2>모험가 상태창</h2></div>
+    <div class="status">
+      <div class="portrait"><div class="crest">${esc(c?.icon||'?')}</div><h2>${esc(U.name)}</h2>
+        <div class="latin">${esc(c?.name||'무직')}</div>
+        <dl class="kv"><dt>성별</dt><dd>${U.gender==='m'?'남성':'여성'}</dd><dt>세계</dt><dd>${esc(g.name)}</dd>
+        <dt>전투력</dt><dd class="num"><b>${power().toLocaleString()}</b></dd><dt>총 모험</dt><dd class="num">${hm(totalMin())}</dd>
+        <dt>유물</dt><dd class="num">${owned.length} / ${D.items.length}종</dd></dl></div>
+      <div style="display:grid;gap:22px;min-width:0">
+        <div><div class="orn" style="color:var(--parch-muted)">능력치 · 과목 숙련도</div>
+        <div class="stats" style="margin-top:12px">${D.subjects.map(s=>{const m=U.study[s.id]||0,l=lv(m),p=(m-lvMin(l))/(lvMin(l+1)-lvMin(l));
+          return `<div class="stat"><span class="seal">${esc(s.icon)}</span><b>${esc(s.name)}</b><span class="lv num">Lv.${l}</span><div class="bar"><i style="width:${p*100}%"></i></div><span class="note num" style="grid-column:2/-1;text-align:right">${hm(m)} · 다음 Lv까지 ${hm(lvMin(l+1)-m)}</span></div>`}).join('')}</div></div>
+        <div><div class="orn" style="color:var(--parch-muted)">소지품</div>
+        <div class="inv" style="margin-top:12px">${owned.length?owned.map(i=>slot(i,U.items[i.id])).join(''):'<p class="note">아직 발견한 유물이 없습니다.</p>'}</div></div>
+        <div><div class="orn" style="color:var(--parch-muted)">모험 일지</div><div style="margin-top:12px">${logList(10)}</div></div>
+      </div></div>
+    <div class="orn" style="color:var(--parch-muted);margin:22px 0 12px">✦</div>
+    <div class="row" style="justify-content:center"><button class="btn" id="edit">이름·성별 수정</button></div></section>`;
+  $('#edit').onclick=()=>{editingProfile=true;render()};
+}
+
+/* ───────── 관리자 (#admin) ───────── */
+const SCHEMA={
+  genres:{label:'장르',fields:[['name','이름'],['sym','상징 문자'],['color','색상','color'],['desc','설명','textarea']]},
+  classes:{label:'직업',fields:[['genre','장르','genre'],['name','이름'],['icon','아이콘 문자'],['tier','단계 (0=기본)','number'],['desc','설명','textarea'],['req','필요 공부시간 (시간)','req'],['items','필요 유물','items'],['hidden','히든 직업','checkbox']]},
+  subjects:{label:'과목',fields:[['name','이름'],['icon','인장 글자']]},
+  items:{label:'유물',fields:[['name','이름'],['icon','아이콘'],['rarity','등급','rarity'],['drop','10분당 드롭률 (%)','number'],['genre','장르 (비우면 전체)','genre?']]}
+};
+let A={tab:'classes',edit:null,filter:''};
+function renderAdmin(){
+  $('#top').hidden=$('#tabs').hidden=true; document.body.dataset.genre='';
+  const sc=SCHEMA[A.tab];
+  let rows=D[A.tab]; if(A.tab==='classes'&&A.filter) rows=rows.filter(c=>c.genre===A.filter);
+  const show=(k,v)=>k==='genre'?esc(find('genres',v)?.name||'전체'):k==='req'?Object.entries(v||{}).map(([s,h])=>`${esc(find('subjects',s)?.name||s)} ${h}h`).join(', '):k==='items'?(v||[]).map(i=>esc(find('items',i)?.name||i)).join(', '):k==='hidden'?(v?'히든':''):esc(v);
+  const cols=sc.fields.filter(f=>!['desc','textarea'].includes(f[2])&&f[0]!=='desc');
+  $('#view').innerHTML=`<div class="admin" style="display:grid;gap:20px">
+  <div class="hero" style="padding-top:8px"><div class="latin">Guild master</div><h1>관리자 길드</h1><p>장르·직업·과목·유물을 편집합니다. 변경 사항은 이 기기에 저장됩니다.</p></div>
+  <div class="tabs-a">${Object.entries(SCHEMA).map(([k,s])=>`<button class="chip" data-t="${k}" aria-pressed="${k===A.tab}">${s.label} <span class="num">${D[k].length}</span></button>`).join('')}
+    <a class="chip" href="#" style="margin-left:auto;text-decoration:none">← 앱으로</a></div>
+  ${A.edit?editForm(sc):''}
+  <section class="sheet">
+    <div class="row" style="justify-content:space-between;margin-bottom:12px"><h2>${sc.label} 목록</h2>
+      <div class="row">${A.tab==='classes'?`<select id="flt" class="chip"><option value="">모든 장르</option>${D.genres.map(g=>`<option value="${g.id}" ${A.filter===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select>`:''}
+      <button class="btn primary" id="add">+ 새 ${sc.label}</button></div></div>
+    <div class="scroll"><table><thead><tr>${cols.map(f=>`<th>${f[1]}</th>`).join('')}<th></th></tr></thead><tbody>
+    ${rows.map(r=>`<tr>${cols.map(f=>`<td>${show(f[0],r[f[0]])}</td>`).join('')}<td style="white-space:nowrap"><button class="chip" data-e="${r.id}">수정</button> <button class="chip" data-d="${r.id}">삭제</button></td></tr>`).join('')}
+    </tbody></table></div></section>
+  <section class="sheet" style="display:grid;gap:12px"><h2>데이터 백업 · 배포</h2>
+    <p class="note">아래 JSON을 복사해 보관하거나, 다른 기기에 붙여넣어 같은 설정을 적용할 수 있습니다. 이후 Apps Script와 연결하면 이 내용이 시트에 저장됩니다.</p>
+    <textarea id="json">${esc(JSON.stringify(D,null,1))}</textarea>
+    <div class="row"><button class="btn" id="cp">복사</button><button class="btn primary" id="imp">붙여넣은 JSON 적용</button><button class="btn" id="rst">기본값으로 초기화</button></div></section></div>`;
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{A={tab:b.dataset.t,edit:null,filter:''};renderAdmin()});
+  $('#flt')&&($('#flt').onchange=e=>{A.filter=e.target.value;renderAdmin()});
+  $('#add').onclick=()=>{A.edit={id:A.tab.slice(0,2)+Date.now().toString(36),...(A.tab==='classes'?{genre:A.filter||D.genres[0]?.id,tier:1,req:{},items:[],hidden:false}:{}),...(A.tab==='items'?{rarity:'일반',drop:5,genre:''}:{}),...(A.tab==='genres'?{color:'#b8955a'}:{}),_new:true};renderAdmin();scrollTo(0,0)};
+  document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{A.edit=structuredClone(find(A.tab,b.dataset.e));renderAdmin();scrollTo(0,0)});
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent=A.tab==='genres'?'장르의 직업도 삭제됨 · 확인':'정말 삭제?';return}
+    const id=b.dataset.d; D[A.tab]=D[A.tab].filter(x=>x.id!==id);
+    if(A.tab==='genres') D.classes=D.classes.filter(c=>c.genre!==id);
+    saveD(); toast('삭제했습니다.'); renderAdmin();
+  });
+  $('#cp').onclick=()=>navigator.clipboard.writeText($('#json').value).then(()=>toast('복사했습니다.'),()=>{$('#json').select();toast('텍스트를 선택했습니다. 직접 복사해 주세요.')});
+  $('#imp').onclick=()=>{try{const d=JSON.parse($('#json').value);if(!['genres','classes','subjects','items'].every(k=>Array.isArray(d[k])))throw 0;D=d;saveD();toast('적용했습니다.');renderAdmin()}catch{toast('JSON 형식이 올바르지 않습니다. genres·classes·subjects·items 목록이 필요합니다.')}};
+  let armed=false; $('#rst').onclick=e=>{if(!armed){armed=true;e.target.textContent='한 번 더 누르면 초기화';return}D=structuredClone(DEFAULT_DATA);saveD();toast('기본값으로 되돌렸습니다.');renderAdmin()};
+  if(A.edit) bindForm(sc);
+}
+function editForm(sc){
+  const e=A.edit, gopt=(v,blank)=>`${blank?`<option value="">전체</option>`:''}${D.genres.map(g=>`<option value="${g.id}" ${v===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}`;
+  const input=([k,label,type])=>{const v=e[k], id='f_'+k;
+    if(type==='textarea') return `<div class="field wide"><label for="${id}">${label}</label><textarea id="${id}" style="min-height:70px;font-family:inherit;font-size:1rem">${esc(v)}</textarea></div>`;
+    if(type==='genre'||type==='genre?') return `<div class="field"><label for="${id}">${label}</label><select id="${id}">${gopt(v,type==='genre?')}</select></div>`;
+    if(type==='rarity') return `<div class="field"><label for="${id}">${label}</label><select id="${id}">${['일반','희귀','전설'].map(r=>`<option ${v===r?'selected':''}>${r}</option>`).join('')}</select></div>`;
+    if(type==='checkbox') return `<div class="field"><label><input type="checkbox" id="${id}" ${v?'checked':''} style="min-height:auto;width:22px;height:22px"> ${label}</label><p class="note">히든 직업은 필요 유물 중 하나를 얻기 전까지 ???로 보입니다.</p></div>`;
+    if(type==='req') return `<div class="field wide"><label>${label}</label><div class="reqs">${D.subjects.map(s=>`<label>${esc(s.name)} <input type="number" min="0" step="0.5" id="rq_${s.id}" value="${v?.[s.id]??''}" placeholder="0"></label>`).join('')}</div></div>`;
+    if(type==='items') return `<div class="field wide"><label>${label}</label><div class="reqs">${D.items.map(i=>`<label><input type="checkbox" id="it_${i.id}" ${v?.includes(i.id)?'checked':''} style="min-height:auto;width:22px;height:22px"> ${esc(i.icon)} ${esc(i.name)}</label>`).join('')}</div></div>`;
+    return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type||'text'}" value="${esc(v)}" ${type==='number'?'step="any"':''}></div>`;};
+  return `<section class="sheet"><h2 style="margin-bottom:12px">${e._new?'새':''} ${sc.label} ${e._new?'추가':'수정'} <span class="note num">${esc(e.id)}</span></h2>
+    <form id="ef">${sc.fields.map(input).join('')}<div class="row wide"><button class="btn primary">저장</button><button type="button" class="btn" id="cancel">취소</button></div></form></section>`;
+}
+function bindForm(sc){
+  $('#cancel').onclick=()=>{A.edit=null;renderAdmin()};
+  $('#ef').onsubmit=ev=>{ev.preventDefault();
+    const e=A.edit;
+    for(const [k,,type] of sc.fields){
+      if(type==='req'){e.req={};D.subjects.forEach(s=>{const h=parseFloat($('#rq_'+s.id).value);if(h>0)e.req[s.id]=h})}
+      else if(type==='items') e.items=D.items.filter(i=>$('#it_'+i.id).checked).map(i=>i.id);
+      else if(type==='checkbox') e[k]=$('#f_'+k).checked;
+      else if(type==='number') e[k]=Number($('#f_'+k).value)||0;
+      else e[k]=$('#f_'+k).value.trim();
+    }
+    if(!e.name) return toast('이름을 입력해 주세요.');
+    const isNew=e._new; delete e._new;
+    if(isNew) D[A.tab].push(e); else D[A.tab]=D[A.tab].map(x=>x.id===e.id?e:x);
+    saveD(); A.edit=null; toast('저장했습니다.'); renderAdmin();
+  };
+}
+
+render();
+</script>
+</body>
+</html>
